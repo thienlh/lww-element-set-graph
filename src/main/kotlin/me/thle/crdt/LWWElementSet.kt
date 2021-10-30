@@ -17,7 +17,7 @@ internal class LWWElementSet<E>() : MutableSet<E>, CvRDT<LWWElementSet<E>> {
 
     private fun foundLaterInTombstone(element: E): Boolean {
         val found = tombstone.find(element)
-        return found != null && found.timestamp.isAfter(add.latestTimestamp())
+        return found != null && found.timestamp > add.latestTimestamp()!!
     }
 
     override val size: Int
@@ -54,7 +54,8 @@ internal class LWWElementSet<E>() : MutableSet<E>, CvRDT<LWWElementSet<E>> {
     override fun addAll(elements: Collection<E>) = add.addAll(elements.map { LWWElement(it) })
 
     override fun clear() {
-        this.removeAll(toList())
+        this.add.clear()
+        this.tombstone.clear()
     }
 
     override fun removeAll(elements: Collection<E>) = tombstone.removeAll(elements.map { LWWElement(it) })

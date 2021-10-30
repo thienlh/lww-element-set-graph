@@ -20,14 +20,14 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test add vertex`() {
+    fun `test add vertex`() {
         g.addVertex("a")
 
         assertTrue(g.contains("a"))
     }
 
     @Test
-    internal fun `test remove vertex`() {
+    fun `test remove vertex`() {
         g.addVertex("a")
 
         g.removeVertex("b")
@@ -38,7 +38,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test remove vertex supporting an edge`() {
+    fun `test remove vertex supporting an edge`() {
         g.addVertex("a")
         g.addVertex("b")
         g.addEdge("a", "b")
@@ -51,7 +51,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test add edge`() {
+    fun `test add edge`() {
         g.addVertex("a")
         g.addVertex("b")
 
@@ -62,7 +62,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test add edge with no vertices`() {
+    fun `test add edge with no vertices`() {
         g.addEdge("a", "b")
 
         // not added
@@ -70,7 +70,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test neighbors`() {
+    fun `test neighbors`() {
         g.addVertex("a")
         g.addVertex("b")
         g.addEdge("a", "b")
@@ -82,7 +82,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test remove edge`() {
+    fun `test remove edge`() {
         g.addVertex("a")
         g.addVertex("b")
         g.addEdge("a", "b")
@@ -93,7 +93,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test remove edge with reversed order`() {
+    fun `test remove edge with reversed order`() {
         g.addVertex("a")
         g.addVertex("b")
         g.addEdge("a", "b")
@@ -104,7 +104,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test get path`() {
+    fun `test get path`() {
         g.addVertex("a")
         g.addVertex("b")
         g.addVertex("c")
@@ -128,7 +128,7 @@ internal class CvRDTGraphTest {
     }
 
     @Test
-    internal fun `test merge`() {
+    fun `test merge`() {
         g.addVertex("a")
         g.addVertex("b")
 

@@ -17,13 +17,13 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test contains with empty set`() {
+    fun `test contains with empty set`() {
         assertFalse(LWWElementSet<String>().contains("a"))
     }
 
     @Test
-    internal fun `test contains`() {
-        val t = Instant.ofEpochMilli(100)
+    fun `test contains`() {
+        val t = 100L
         val s = LWWElementSet(setOf(LWWElement("a", t)), setOf(LWWElement("b", t)))
 
         assertTrue(s.contains("a"))
@@ -32,32 +32,32 @@ internal class LWWElementSetTest {
 
 
     @Test
-    internal fun `test contains with same element found in tombstone`() {
+    fun `test contains with same element found in tombstone`() {
         // element in tombstone has later timestamp compare to
         // the latest timestamp in add set
-        val t = Instant.ofEpochMilli(100)
-        var s = LWWElementSet(setOf(LWWElement("a", t)), setOf(LWWElement("a", t.plusMillis(100))))
+        val t = 100L
+        var s = LWWElementSet(setOf(LWWElement("a", t)), setOf(LWWElement("a", t + 1)))
 
         assertFalse(s.contains("a"))
 
         // element in tombstone has earlier timestamp compare to
         // the latest timestamp in add set
-        s = LWWElementSet(setOf(LWWElement("a", t)), setOf(LWWElement("a", t.minusMillis(100))))
+        s = LWWElementSet(setOf(LWWElement("a", t)), setOf(LWWElement("a", t - 1)))
 
         assertTrue(s.contains("a"))
 
         // the latest timestamp in add set is from a different element
         s =
             LWWElementSet(
-                setOf(LWWElement("a", t), LWWElement("b", t.plusMillis(1000))),
-                setOf(LWWElement("a", t.minusMillis(100)))
+                setOf(LWWElement("a", t), LWWElement("b", t + 1)),
+                setOf(LWWElement("a", t + 1))
             )
 
         assertTrue(s.contains("a"))
     }
 
     @Test
-    internal fun `test add`() {
+    fun `test add`() {
         val s = LWWElementSet<String>()
         s.add("a")
         s.add("a")
@@ -66,7 +66,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test add all`() {
+    fun `test add all`() {
         val s = LWWElementSet<String>()
         s.addAll(listOf("a", "b", "c"))
         assertTrue(s.contains("a"))
@@ -75,7 +75,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test clear`() {
+    fun `test clear`() {
         val s = LWWElementSet<Int>()
         s.addAll(listOf(1, 2, 3))
         s.clear()
@@ -83,7 +83,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test add after remove`() {
+    fun `test add after remove`() {
         // The advantage of LWW-Element-Set over 2P-Set is that,
         // unlike 2P-Set, LWW-Element-Set allows an element to be reinserted after having been removed.
         // https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type#cite_note-2011CRDTSurvey-2
@@ -96,7 +96,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test remove`() {
+    fun `test remove`() {
         val s = LWWElementSet<String>()
         s.add("a")
 
@@ -105,8 +105,9 @@ internal class LWWElementSetTest {
         assertFalse(s.contains("a"))
     }
 
+
     @Test
-    internal fun `test remove twice`() {
+    fun `test remove twice`() {
         val s = LWWElementSet<String>()
         s.add("a")
 
@@ -117,7 +118,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test size`() {
+    fun `test size`() {
         val s = LWWElementSet<String>()
 
         s.add("a")
@@ -134,7 +135,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test contains all`() {
+    fun `test contains all`() {
         val s = LWWElementSet<String>()
 
         s.add("a")
@@ -148,7 +149,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test is empty`() {
+    fun `test is empty`() {
         val s = LWWElementSet<String>()
 
         assertTrue(s.isEmpty())
@@ -161,7 +162,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test iterator`() {
+    fun `test iterator`() {
         val s = LWWElementSet<String>()
 
         assertFalse(s.iterator().hasNext())
@@ -174,7 +175,7 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test merge`() {
+    fun `test merge`() {
         val s1 = LWWElementSet<String>()
         val s2 = LWWElementSet<String>()
 
@@ -200,10 +201,10 @@ internal class LWWElementSetTest {
     }
 
     @Test
-    internal fun `test merge with same timestamp`() {
-        val t = Instant.ofEpochMilli(100)
+    fun `test merge with same timestamp`() {
+        val t = 100L
         // add and remove with same timestamp
-        val t1 = t.plusMillis(100)
+        val t1 = t + 1
         val s1 = LWWElementSet(setOf(LWWElement("a", t), LWWElement("b", t1)), setOf())
         val s2 = LWWElementSet(setOf(LWWElement("a", t)), setOf(LWWElement("a", t1)))
 
