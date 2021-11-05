@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Instant
 
 internal class LWWElementSetTest {
     @BeforeEach
@@ -47,13 +46,11 @@ internal class LWWElementSetTest {
         assertTrue(s.contains("a"))
 
         // the latest timestamp in add set is from a different element
-        s =
-            LWWElementSet(
-                setOf(LWWElement("a", t), LWWElement("b", t + 1)),
-                setOf(LWWElement("a", t + 1))
-            )
+        s = LWWElementSet(
+            add = setOf(LWWElement("a", t), LWWElement("b", t + 1)), tombstone = setOf(LWWElement("a", t + 1))
+        )
 
-        assertTrue(s.contains("a"))
+        assertFalse(s.contains("a"))
     }
 
     @Test
@@ -202,16 +199,34 @@ internal class LWWElementSetTest {
 
     @Test
     fun `test merge with same timestamp`() {
+        // TODO: 05/11/2021 double check if this behavior is valid
         val t = 100L
         // add and remove with same timestamp
         val t1 = t + 1
-        val s1 = LWWElementSet(setOf(LWWElement("a", t), LWWElement("b", t1)), setOf())
-        val s2 = LWWElementSet(setOf(LWWElement("a", t)), setOf(LWWElement("a", t1)))
+        val s1 = LWWElementSet(add = setOf(LWWElement("a", t1), LWWElement("b", t1)), tombstone = setOf())
+        val s2 = LWWElementSet(add = setOf(LWWElement("a", t)), tombstone = setOf(LWWElement("a", t1)))
 
         // should bias toward add
         assert(s1.merge(s2).containsAll(listOf("a", "b")))
 
         s2.remove("a")
         assert(s1.merge(s2).containsAll(listOf("b")))
+    }
+
+    @Test
+    fun `test remove all`() {
+        val s = LWWElementSet<String>()
+        assertFalse(s.removeAll(listOf()))
+        assertFalse(s.removeAll(listOf("a")))
+
+        s.add("a")
+        s.add("b")
+        assertTrue(s.removeAll(listOf("a", "b")))
+        assertTrue(s.size == 0)
+        assertTrue(s.isEmpty())
+
+        s.add("c")
+        assertTrue(s.size == 1)
+        assertTrue(s.isNotEmpty())
     }
 }

@@ -16,8 +16,8 @@ internal class LWWElementSet<E>() : MutableSet<E>, CvRDT<LWWElementSet<E>> {
     override fun contains(element: E) = add.contains(element) && !foundLaterInTombstone(element)
 
     private fun foundLaterInTombstone(element: E): Boolean {
-        val found = tombstone.find(element)
-        return found != null && found.timestamp > add.latestTimestamp()!!
+        val fromTombstone = tombstone.find(element)
+        return fromTombstone != null && fromTombstone.timestamp > add.largestTimestampFor(element)!!
     }
 
     override val size: Int
@@ -58,13 +58,20 @@ internal class LWWElementSet<E>() : MutableSet<E>, CvRDT<LWWElementSet<E>> {
         this.tombstone.clear()
     }
 
-    override fun removeAll(elements: Collection<E>) = tombstone.removeAll(elements.map { LWWElement(it) })
+    override fun removeAll(elements: Collection<E>): Boolean {
+        tombstone.addAll(elements.map { LWWElement(it) }.toSet())
+        return add.values().intersect(tombstone.values()).isNotEmpty()
+    }
 
     override fun retainAll(elements: Collection<E>) = TODO("not yet implemented")
 
-    private fun Collection<LWWElement<E>>.latestTimestamp() = map(LWWElement<E>::timestamp).maxOrNull()
+    private fun Collection<LWWElement<E>>.largestTimestampFor(element: E) =
+        filter { e -> e.value == element }.maxOfOrNull { e -> e.timestamp }
 
     private fun Collection<LWWElement<E>>.contains(e: E) = any { element -> element.value == e }
 
-    private fun Collection<LWWElement<E>>.find(e: E) = find { element -> element.value == e }
+    private fun Collection<LWWElement<E>>.find(e: E) =
+        filter { element -> element.value == e }.maxByOrNull { r -> r.timestamp }
+
+    private fun Collection<LWWElement<E>>.values() = map { e -> e.value }.toSet()
 }
